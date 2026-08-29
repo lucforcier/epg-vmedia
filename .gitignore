@@ -1,0 +1,26 @@
+# Configuration locale — peut contenir des paramètres propres au déploiement
+.env
+
+# Binaires compilés
+/epg-vmedia
+/generate-epg
+
+# Fichiers XMLTV générés
+/data/*.xml
+/data/.*.tmp
+
+# Bases SQLite locales
+/data/*.db
+/data/*.db-shm
+/data/*.db-wal
+
+# Caches générés
+/data/images/
+/data/logos/
+
+# Données générées / spécifiques à l'environnement
+/data/channels.json
+
+# Archives historiques de développement
+/_archive-analysis/
+/_archive-database/

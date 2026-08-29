@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>EPG Web - Chaînes</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 25px 30px;
+            color: #222;
+            background: #fff;
+        }
+
+        h1 {
+            margin: 0 0 6px 0;
+            font-size: 26px;
+        }
+
+        /* ------------------------------------------------------------
+         * Compteurs
+         * ------------------------------------------------------------ */
+
+        .summary {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 15px 0 18px 0;
+        }
+
+        .counter {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 7px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f7f7f7;
+            font-size: 14px;
+        }
+
+        .counter strong {
+            font-size: 16px;
+        }
+
+        .counter.new {
+            background: #fff7d6;
+            border-color: #e6c84f;
+        }
+
+        .counter.base {
+            background: #eef8ee;
+            border-color: #b8d8b8;
+        }
+
+        .counter.a-la-carte {
+            background: #f5f5f5;
+        }
+
+        /* ------------------------------------------------------------
+         * Actions
+         * ------------------------------------------------------------ */
+
+        .actions {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            padding: 12px 0;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 15px;
+        }
+
+        button {
+            padding: 8px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            border: 1px solid #bbb;
+            border-radius: 5px;
+            background: #fff;
+        }
+
+        button:hover {
+            background: #f5f5f5;
+        }
+
+        .save-button {
+            font-weight: bold;
+            border-color: #1677ff;
+            background: #1677ff;
+            color: white;
+        }
+
+        .save-button:hover {
+            background: #0867eb;
+        }
+
+        .refresh-button {
+            border-color: #777;
+        }
+
+        .selection-count {
+            margin-left: 8px;
+            color: #555;
+        }
+
+        /* ------------------------------------------------------------
+         * Recherche
+         * ------------------------------------------------------------ */
+
+        .search {
+            margin-bottom: 15px;
+        }
+
+        .search input {
+            width: 450px;
+            max-width: 100%;
+            padding: 9px 12px;
+            font-size: 15px;
+            border: 1px solid #bbb;
+            border-radius: 5px;
+        }
+
+        /* ------------------------------------------------------------
+         * Tableau
+         * ------------------------------------------------------------ */
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th,
+        td {
+            border-bottom: 1px solid #ddd;
+            padding: 8px 10px;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        th {
+            background: #f3f3f3;
+            position: sticky;
+            top: 61px;
+            z-index: 10;
+            white-space: nowrap;
+        }
+
+        tr:hover {
+            background: #fafafa;
+        }
+
+        .channel-row.selected {
+            background: #f5fff5;
+        }
+
+        .channel-row.is-new {
+            background: #fff9df;
+            border-left: 4px solid #e0b800;
+        }
+
+        .channel-row.is-new:hover {
+            background: #fff5c4;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .channel-checkbox {
+            transform: scale(1.15);
+        }
+
+        .channel-name {
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .callsign {
+            color: #777;
+        }
+
+        .channel-id {
+            color: #888;
+            font-size: 12px;
+        }
+
+        .channel-lcn {
+            font-weight: bold;
+            text-align: center;
+            width: 65px;
+        }
+
+        /* ------------------------------------------------------------
+         * Nouvelle
+         * ------------------------------------------------------------ */
+
+        .new-badge {
+            display: inline-block;
+            padding: 3px 7px;
+            border-radius: 4px;
+            background: #e0b800;
+            color: #222;
+            font-size: 11px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .configured-badge {
+            display: inline-block;
+            padding: 3px 7px;
+            border-radius: 4px;
+            background: #e7f5e7;
+            color: #287228;
+            font-size: 11px;
+            white-space: nowrap;
+        }
+
+        /* ------------------------------------------------------------
+         * Base / à la carte
+         * ------------------------------------------------------------ */
+
+        .base-cell {
+            text-align: center;
+            width: 110px;
+        }
+
+        .base-checkbox {
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+
+        .base-label {
+            display: block;
+            margin-top: 3px;
+            font-size: 11px;
+            color: #777;
+        }
+
+        /* ------------------------------------------------------------
+         * Logos
+         * ------------------------------------------------------------ */
+
+        .logos-cell {
+            width: 160px;
+            text-align: center;
+        }
+
+        .logo-choices {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .logo-choice {
+            width: 62px;
+            height: 48px;
+            border: 2px solid transparent;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3px;
+            transition:
+                border-color 0.15s,
+                background 0.15s;
+        }
+
+        .logo-choice:hover {
+            border-color: #aaa;
+            background: #f5f5f5;
+        }
+
+        .logo-choice.active {
+            border-color: #1677ff;
+            background: #eef5ff;
+        }
+
+        .logo-choice img {
+            max-width: 56px;
+            max-height: 42px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .logo-label {
+            font-size: 10px;
+            color: #777;
+            margin-top: 2px;
+        }
+
+        /* ------------------------------------------------------------
+         * Colonnes
+         * ------------------------------------------------------------ */
+
+        .selection-cell {
+            width: 75px;
+            text-align: center;
+        }
+
+        .status-cell {
+            width: 90px;
+            text-align: center;
+        }
+
+        /* ------------------------------------------------------------
+         * Message
+         * ------------------------------------------------------------ */
+
+        .message {
+            display: none;
+            margin: 10px 0;
+            padding: 10px 12px;
+            border-radius: 5px;
+            background: #eef5ff;
+            border: 1px solid #bdd5ff;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>Chaînes {{.ProviderName}}</h1>
+
+<div class="summary">
+
+    <div class="counter">
+        <strong id="total-count">0</strong>
+        disponibles
+    </div>
+
+    <div class="counter">
+        <strong id="selected-count">0</strong>
+        sélectionnées
+    </div>
+
+    <div class="counter new">
+        <strong id="new-count">0</strong>
+        nouvelles
+    </div>
+
+    <div class="counter base">
+        <strong id="base-count">0</strong>
+        de base
+    </div>
+
+    <div class="counter a-la-carte">
+        <strong id="a-la-carte-count">0</strong>
+        à la carte
+    </div>
+
+</div>
+
+<div id="message" class="message"></div>
+
+<form method="POST" action="/channels" id="channels-form">
+
+    <div class="actions">
+
+        <button type="button" onclick="selectAll()">
+            Tout sélectionner
+        </button>
+
+        <button type="button" onclick="deselectAll()">
+            Tout désélectionner
+        </button>
+
+        <button type="button" onclick="invertSelection()">
+            Inverser
+        </button>
+
+        <button type="submit" class="save-button">
+            Enregistrer
+        </button>
+
+        <button
+            type="button"
+            class="refresh-button"
+            onclick="refreshChannels()"
+        >
+            ↻ Rafraîchir chaînes + logos
+        </button>
+
+        <span class="selection-count" id="visible-count"></span>
+
+    </div>
+
+    <div class="search">
+        <input
+            type="search"
+            id="channel-search"
+            placeholder="Rechercher une chaîne, un LCN ou un Call Sign..."
+            autocomplete="off"
+        >
+    </div>
+
+    <table id="channels-table">
+
+        <thead>
+            <tr>
+                <th class="selection-cell">EPG</th>
+                <th>LCN</th>
+                <th class="status-cell">État</th>
+                <th>Logo</th>
+                <th class="base-cell">Base</th>
+                <th>Chaîne</th>
+                <th>Call Sign</th>
+                <th>ID {{.ProviderName}}</th>
+            </tr>
+        </thead>
+
+        <tbody id="channels-body">
+
+            {{range .Channels}}
+
+            <tr
+                class="channel-row {{if .IsNew}}is-new{{end}} {{if .Enabled}}selected{{end}}"
+                data-id="{{.ID}}"
+                data-lcn="{{.AccessNum}}"
+                data-new="{{if .IsNew}}1{{else}}0{{end}}"
+            >
+
+                <!-- Sélection EPG -->
+
+                <td class="selection-cell">
+
+                    <input
+                        type="checkbox"
+                        name="channel"
+                        value="{{.ID}}"
+                        class="channel-checkbox"
+                        {{if .Enabled}}checked{{end}}
+                    >
+
+                </td>
+
+                <!-- LCN -->
+
+                <td class="channel-lcn">
+                    {{.AccessNum}}
+                </td>
+
+                <!-- État -->
+
+                <td class="status-cell">
+
+                    {{if .IsNew}}
+
+                    <span class="new-badge">
+                        NOUVELLE
+                    </span>
+
+                    {{else}}
+
+                    <span class="configured-badge">
+                        OK
+                    </span>
+
+                    {{end}}
+
+                </td>
+
+                <!-- Logos -->
+
+                <td class="logos-cell">
+
+                    <input
+                        type="hidden"
+                        name="logo_preference_{{.ID}}"
+                        value="{{.LogoPreference}}"
+                        class="logo-preference"
+                    >
+
+                    <div class="logo-choices">
+
+                        {{if .ColorLogoURL}}
+
+                        <div class="logo-option">
+
+                            <button
+                                type="button"
+                                class="logo-choice {{if eq .LogoPreference "color"}}active{{end}}"
+                                title="Logo couleur"
+                                onclick="selectLogo(this, '{{.ID}}', 'color')"
+                            >
+                                <img
+                                    src="/logos/{{.ID}}/color.png"
+                                    alt="Logo couleur {{.Name}}"
+                                    loading="lazy"
+                                >
+                            </button>
+
+                            <div class="logo-label">
+                                Couleur
+                            </div>
+
+                        </div>
+
+                        {{end}}
+
+                        {{if .MonochromeLogoURL}}
+
+                        <div class="logo-option">
+
+                            <button
+                                type="button"
+                                class="logo-choice {{if eq .LogoPreference "mono"}}active{{end}}"
+                                title="Logo monochrome"
+                                onclick="selectLogo(this, '{{.ID}}', 'mono')"
+                            >
+                                <img
+                                    src="/logos/{{.ID}}/mono.png"
+                                    alt="Logo monochrome {{.Name}}"
+                                    loading="lazy"
+                                >
+                            </button>
+
+                            <div class="logo-label">
+                                Mono
+                            </div>
+
+                        </div>
+
+                        {{end}}
+
+                    </div>
+
+                </td>
+
+                <!-- Base / à la carte -->
+
+                <td class="base-cell">
+
+                    <input
+                        type="checkbox"
+                        name="is_base_{{.ID}}"
+                        value="1"
+                        class="base-checkbox"
+                        {{if .IsBase}}checked{{end}}
+                        onchange="baseChanged(this)"
+                    >
+
+                    <span class="base-label">
+                        <span class="base-text">
+                            {{if .IsBase}}
+                                Base
+                            {{else}}
+                                À la carte
+                            {{end}}
+                        </span>
+                    </span>
+
+                </td>
+
+                <!-- Nom -->
+
+                <td class="channel-name">
+                    {{.Name}}
+                </td>
+
+                <!-- Call Sign -->
+
+                <td class="callsign">
+                    {{.CallSign}}
+                </td>
+
+                <!-- ID -->
+
+                <td class="channel-id">
+                    {{.ID}}
+                </td>
+
+            </tr>
+
+            {{end}}
+
+        </tbody>
+
+    </table>
+
+</form>
+
+
+<script>
+
+    const form = document.getElementById("channels-form");
+    const tableBody = document.getElementById("channels-body");
+    const searchInput = document.getElementById("channel-search");
+    const visibleCount = document.getElementById("visible-count");
+    const message = document.getElementById("message");
+
+    /*
+     * ------------------------------------------------------------
+     * Compteurs
+     * ------------------------------------------------------------
+     */
+
+    function updateCounters() {
+
+        const rows = document.querySelectorAll(".channel-row");
+        const checkboxes =
+            document.querySelectorAll(".channel-checkbox");
+
+        let selected = 0;
+        let newCount = 0;
+        let baseCount = 0;
+
+        rows.forEach(function(row) {
+
+            const checkbox =
+                row.querySelector(".channel-checkbox");
+
+            const baseCheckbox =
+                row.querySelector(".base-checkbox");
+
+            if (checkbox && checkbox.checked) {
+                selected++;
+            }
+
+            if (row.dataset.new === "1") {
+                newCount++;
+            }
+
+            if (baseCheckbox && baseCheckbox.checked) {
+                baseCount++;
+            }
+
+        });
+
+        document.getElementById("total-count").textContent =
+            rows.length;
+
+        document.getElementById("selected-count").textContent =
+            selected;
+
+        document.getElementById("new-count").textContent =
+            newCount;
+
+        document.getElementById("base-count").textContent =
+            baseCount;
+
+        document.getElementById("a-la-carte-count").textContent =
+            rows.length - baseCount;
+
+    }
+
+
+    /*
+     * ------------------------------------------------------------
+     * Sélection EPG
+     * ------------------------------------------------------------
+     */
+
+    function updateSelection() {
+
+        document
+            .querySelectorAll(".channel-checkbox")
+            .forEach(function(checkbox) {
+
+                const row = checkbox.closest("tr");
+
+                if (checkbox.checked) {
+                    row.classList.add("selected");
+                } else {
+                    row.classList.remove("selected");
+                }
+
+            });
+
+        updateCounters();
+    }
+
+
+    function selectAll() {
+
+        document
+            .querySelectorAll(".channel-row:not(.hidden) .channel-checkbox")
+            .forEach(function(checkbox) {
+
+                checkbox.checked = true;
+
+            });
+
+        updateSelection();
+    }
+
+
+    function deselectAll() {
+
+        document
+            .querySelectorAll(".channel-row:not(.hidden) .channel-checkbox")
+            .forEach(function(checkbox) {
+
+                checkbox.checked = false;
+
+            });
+
+        updateSelection();
+    }
+
+
+    function invertSelection() {
+
+        document
+            .querySelectorAll(".channel-row:not(.hidden) .channel-checkbox")
+            .forEach(function(checkbox) {
+
+                checkbox.checked = !checkbox.checked;
+
+            });
+
+        updateSelection();
+    }
+
+
+    /*
+     * ------------------------------------------------------------
+     * Recherche
+     * ------------------------------------------------------------
+     */
+
+    function filterChannels() {
+
+        const search =
+            searchInput.value.toLowerCase().trim();
+
+        let visible = 0;
+
+        document
+            .querySelectorAll(".channel-row")
+            .forEach(function(row) {
+
+                const text =
+                    row.textContent.toLowerCase();
+
+                if (text.includes(search)) {
+
+                    row.classList.remove("hidden");
+                    visible++;
+
+                } else {
+
+                    row.classList.add("hidden");
+
+                }
+
+            });
+
+        visibleCount.textContent =
+            visible +
+            " chaîne" +
+            (visible !== 1 ? "s" : "") +
+            " affichée" +
+            (visible !== 1 ? "s" : "");
+
+    }
+
+
+    /*
+     * ------------------------------------------------------------
+     * Logo
+     * ------------------------------------------------------------
+     */
+
+    function selectLogo(button, channelID, preference) {
+
+        const row = button.closest("tr");
+
+        row
+            .querySelectorAll(".logo-choice")
+            .forEach(function(choice) {
+
+                choice.classList.remove("active");
+
+            });
+
+        button.classList.add("active");
+
+        const input =
+            row.querySelector(".logo-preference");
+
+        if (input) {
+            input.value = preference;
+        }
+
+        /*
+         * Une nouvelle chaîne vient d'être traitée.
+         * Le backend devra ensuite persister is_new=0.
+         */
+
+        markNewAsConfigured(row);
+
+    }
+
+
+    /*
+     * ------------------------------------------------------------
+     * Base / à la carte
+     * ------------------------------------------------------------
+     */
+
+    function baseChanged(checkbox) {
+
+        const row = checkbox.closest("tr");
+
+        const label =
+            row.querySelector(".base-text");
+
+        if (label) {
+
+            label.textContent =
+                checkbox.checked
+                    ? "Base"
+                    : "À la carte";
+
+        }
+
+        updateCounters();
+
+        /*
+         * Une nouvelle chaîne vient d'être traitée.
+         * Le backend devra ensuite persister is_new=0.
+         */
+
+        markNewAsConfigured(row);
+
+    }
+
+
+    /*
+     * ------------------------------------------------------------
+     * Nouvelle chaîne → configuration
+     * ------------------------------------------------------------
+     */
+
+    function markNewAsConfigured(row) {
+
+        if (row.dataset.new !== "1") {
+            return;
+        }
+        
+                /*
+         * Signaler au backend que cette nouvelle chaîne
+         * a reçu une configuration explicite.
+         */
+
+        let processed =
+            row.querySelector(".processed-input");
+
+        if (!processed) {
+
+            processed = document.createElement("input");
+
+            processed.type = "hidden";
+            processed.name =
+                "processed_" + row.dataset.id;
+            processed.value = "1";
+            processed.className =
+                "processed-input";
+
+            form.appendChild(processed);
+        }
+
+        /*
+         * Pour l'instant, on modifie immédiatement l'affichage.
+         * La sauvegarde réelle de is_new=0 sera faite par main.go.
+         */
+
+        row.dataset.new = "0";
+
+        row.classList.remove("is-new");
+
+        const badge =
+            row.querySelector(".new-badge");
+
+        if (badge) {
+
+            badge.className =
+                "configured-badge";
+
+            badge.textContent =
+                "OK";
+
+        }
+
+        /*
+         * Replacer immédiatement selon le LCN.
+         */
+
+        sortRowsByLCN();
+
+        updateCounters();
+
+    }
+
+
+    /*
+     * ------------------------------------------------------------
+     * Tri
+     *
+     * Nouvelles en premier.
+     * Ensuite LCN.
+     * ------------------------------------------------------------
+     */
+
+    function sortRowsByLCN() {
+
+        const rows =
+            Array.from(
+                tableBody.querySelectorAll(".channel-row")
+            );
+
+        rows.sort(function(a, b) {
+
+            const newA =
+                a.dataset.new === "1" ? 0 : 1;
+
+            const newB =
+                b.dataset.new === "1" ? 0 : 1;
+
+            if (newA !== newB) {
+                return newA - newB;
+            }
+
+            const lcnA =
+                parseInt(a.dataset.lcn, 10);
+
+            const lcnB =
+                parseInt(b.dataset.lcn, 10);
+
+            if (lcnA !== lcnB) {
+                return lcnA - lcnB;
+            }
+
+            const idA =
+                parseInt(a.dataset.id, 10);
+
+            const idB =
+                parseInt(b.dataset.id, 10);
+
+            return idA - idB;
+
+        });
+
+        rows.forEach(function(row) {
+
+            tableBody.appendChild(row);
+
+        });
+
+    }
+
+
+    /*
+     * ------------------------------------------------------------
+     * Rafraîchir chaînes + logos
+     *
+     * La route sera ajoutée dans main.go.
+     * ------------------------------------------------------------
+     */
+
+    function refreshChannels() {
+
+        if (
+            !confirm(
+                "Rafraîchir le catalogue des chaînes depuis VMedia ?"
+            )
+        ) {
+            return;
+        }
+
+        const button =
+            document.querySelector(".refresh-button");
+
+        button.disabled = true;
+        button.textContent = "↻ Rafraîchissement...";
+
+        fetch("/channels/refresh", {
+            method: "POST"
+        })
+        .then(function(response) {
+
+            if (!response.ok) {
+                throw new Error(
+                    "Erreur HTTP " + response.status
+                );
+            }
+
+            return response.text();
+
+        })
+        .then(function() {
+
+            window.location.reload();
+
+        })
+        .catch(function(error) {
+
+            button.disabled = false;
+            button.textContent =
+                "↻ Rafraîchir chaînes + logos";
+
+            message.style.display = "block";
+
+            message.textContent =
+                "Erreur lors du rafraîchissement : " +
+                error.message;
+
+        });
+
+    }
+
+
+    /*
+     * ------------------------------------------------------------
+     * Événements
+     * ------------------------------------------------------------
+     */
+
+    document
+        .querySelectorAll(".channel-checkbox")
+        .forEach(function(checkbox) {
+
+            checkbox.addEventListener(
+                "change",
+                updateSelection
+            );
+
+        });
+
+    searchInput.addEventListener(
+        "input",
+        filterChannels
+    );
+
+
+    /*
+     * ------------------------------------------------------------
+     * Initialisation
+     * ------------------------------------------------------------
+     */
+
+    sortRowsByLCN();
+    updateSelection();
+    filterChannels();
+
+</script>
+
+</body>
+</html>
