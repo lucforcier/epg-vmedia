@@ -111,6 +111,9 @@ func main() {
 		"Chaînes à importer : %d",
 		len(channelFilter),
 	)
+	if len(channelFilter) == 0 {
+		log.Fatal("aucune chaîne activée dans SQLite ; import du guide impossible")
+	}
 
 	// ------------------------------------------------------------
 	// API VMedia
@@ -192,11 +195,11 @@ func main() {
 					err,
 				)
 
-				log.Printf(
-					"Import interrompu. Les pages précédentes ont été conservées dans SQLite.",
+				log.Fatalf(
+					"Import interrompu après échec de la page %d : les pages précédentes ont été conservées dans SQLite : %v",
+					page,
+					err,
 				)
-
-				return
 			}
 
 			delay := guideRetryBaseDelay * time.Duration(1<<(attempt-1))
@@ -537,7 +540,11 @@ func main() {
 		}
 	}
 
-	// ------------------------------------------------------------
+	if totalImported == 0 {
+		log.Fatal("aucun événement importé ; génération XMLTV annulée pour éviter de publier un guide vide")
+	}
+
+// ------------------------------------------------------------
 	// Résultat
 	// ------------------------------------------------------------
 
