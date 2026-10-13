@@ -13,7 +13,7 @@ Application Go permanente qui récupère le guide TV du fournisseur VMedia/Fizz,
 
 ## Déploiement Docker / Portainer
 
-L’image publique est publiée sur GitHub Container Registry :
+Après fusion de la pull request et publication réussie du workflow, l’image sera disponible sur GitHub Container Registry :
 
 `ghcr.io/lucforcier/epg-vmedia:latest`
 
@@ -52,7 +52,7 @@ Après démarrage, ouvre :
 - Interface de gestion des chaînes : `http://ADRESSE_DU_SERVEUR:18088/channels`
 - Guide XMLTV : `http://ADRESSE_DU_SERVEUR:18088/epg.xml`
 
-Au premier démarrage, le catalogue des chaînes doit être importé depuis VMedia, puis les chaînes désirées doivent être activées dans l’interface. Le guide principal ne peut pas être généré tant qu’aucune chaîne n’est activée. Si le guide retourne une erreur ou une réponse 404 au premier démarrage, consulte les journaux de la Stack et termine l’initialisation des chaînes.
+Au premier démarrage, ouvre `/channels`, clique sur « Rafraîchir chaînes + logos » pour importer le catalogue, puis sélectionne les chaînes désirées et clique sur « Enregistrer ». Le guide pré-généré est recréé après l’enregistrement. Tant qu’aucune chaîne n’est activée, `/epg.xml` peut retourner une erreur 404.
 
 ### 4. Vérification
 
