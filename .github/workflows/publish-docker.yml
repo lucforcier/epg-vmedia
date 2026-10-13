@@ -34,6 +34,7 @@ jobs:
         run: |
           go build -o /tmp/epg-vmedia ./cmd/epg-vmedia
           go build -o /tmp/import-channels ./cmd/import-channels
+          go build -o /tmp/import-guide ./cmd/import-guide
           go build -o /tmp/generate-epg ./cmd/generate-epg
 
   docker:
