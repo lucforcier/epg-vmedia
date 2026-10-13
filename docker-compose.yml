@@ -1,0 +1,38 @@
+services:
+  epg-vmedia:
+    image: ghcr.io/lucforcier/epg-vmedia:latest
+    container_name: epg-vmedia
+    restart: unless-stopped
+    ports:
+      - "${EPG_HTTP_PORT:-18088}:5580"
+    environment:
+      TZ: ${TZ:-America/Toronto}
+      EPG_PROVIDER: ${EPG_PROVIDER:-fizz}
+      VMEDIA_API_URL: ${VMEDIA_API_URL:-https://a2.vmedia.ca}
+      VMEDIA_IMAGE_URL: ${VMEDIA_IMAGE_URL:-https://images.vmedia.ca/api/images}
+      VMEDIA_SITE_ID: ${VMEDIA_SITE_ID:-176}
+      VMEDIA_APP_NAME: ${VMEDIA_APP_NAME:-F-GOOGLE-PLAY}
+      VMEDIA_LANGUAGE: ${VMEDIA_LANGUAGE:-fra}
+      EPG_HOST: 0.0.0.0
+      EPG_PORT: "5580"
+      EPG_DATA_DIR: /data
+      EPG_XML_PATH: /data/epg.xml
+      EPG_BASE_URL: ${EPG_BASE_URL:?Définir EPG_BASE_URL avec une URL accessible depuis les clients IPTV}
+      EPG_SCHEDULER_ENABLED: ${EPG_SCHEDULER_ENABLED:-true}
+      EPG_SCHEDULER_TIME: ${EPG_SCHEDULER_TIME:-03:00}
+      EPG_SCHEDULER_TIMEZONE: ${TZ:-America/Toronto}
+      EPG_CHANNEL_REFRESH_ENABLED: ${EPG_CHANNEL_REFRESH_ENABLED:-true}
+      EPG_CHANNEL_REFRESH_DAY: ${EPG_CHANNEL_REFRESH_DAY:-1}
+      EPG_CHANNEL_REFRESH_TIME: ${EPG_CHANNEL_REFRESH_TIME:-03:30}
+      IMAGE_CACHE_CLEANUP_ENABLED: ${IMAGE_CACHE_CLEANUP_ENABLED:-true}
+      IMAGE_CACHE_CLEANUP_DAY: ${IMAGE_CACHE_CLEANUP_DAY:-1}
+      IMAGE_CACHE_CLEANUP_TIME: ${IMAGE_CACHE_CLEANUP_TIME:-04:00}
+      IMAGE_CACHE_MAX_AGE_DAYS: ${IMAGE_CACHE_MAX_AGE_DAYS:-90}
+    volumes:
+      - ${EPG_DATA_DIR:-./data}:/data
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:5580/channels"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 90s

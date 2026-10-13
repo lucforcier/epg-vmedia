@@ -130,15 +130,22 @@ func main() {
 	log.Println("========================================")
 
 	if err := generateEPG(); err != nil {
-		log.Fatalf(
-			"Erreur génération XMLTV au démarrage : %v",
+		// Le serveur web doit rester accessible au premier démarrage,
+		// notamment pour permettre l'importation et la sélection des
+		// chaînes depuis /channels. Le guide sera généré après activation
+		// d'au moins une chaîne ou lors du prochain passage du scheduler.
+		log.Printf(
+			"Guide XMLTV non disponible au démarrage : %v",
 			err,
 		)
+		log.Println(
+			"Le serveur reste actif pour permettre la configuration des chaînes",
+		)
+	} else {
+		log.Println(
+			"Génération XMLTV au démarrage terminée avec succès",
+		)
 	}
-
-	log.Println(
-		"Génération XMLTV au démarrage terminée avec succès",
-	)
 
 	// ------------------------------------------------------------
 	// Scheduler XMLTV
@@ -621,6 +628,12 @@ func main() {
 				len(enabled),
 				processedCount,
 			)
+
+			// Publier immédiatement le guide correspondant à la sélection
+			// sauvegardée, plutôt que d'attendre la prochaine exécution planifiée.
+			if err := generateEPG(); err != nil {
+				log.Printf("Impossible de régénérer le guide après la sauvegarde des chaînes : %v", err)
+			}
 
 			http.Redirect(
 				w,
