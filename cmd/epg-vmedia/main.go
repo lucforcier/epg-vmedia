@@ -118,6 +118,38 @@ func main() {
 	}
 
 	// ------------------------------------------------------------
+	// Importation du guide VMedia
+	// ------------------------------------------------------------
+
+	var guideRefreshMu sync.Mutex
+
+	refreshGuide := func() error {
+		guideRefreshMu.Lock()
+		defer guideRefreshMu.Unlock()
+
+		log.Println("Importation du guide VMedia : fenêtre glissante de 14 jours")
+
+		cmd := exec.Command(
+			"/opt/epg-vmedia/import-guide",
+			"-hours",
+			"336",
+		)
+
+		output, err := cmd.CombinedOutput()
+		if len(output) > 0 {
+			log.Printf("Sortie import-guide :\\n%s", string(output))
+		}
+		if err != nil {
+			return fmt.Errorf("import-guide (14 jours) : %w", err)
+		}
+
+		if err := generateEPG(); err != nil {
+			return fmt.Errorf("génération XMLTV après import : %w", err)
+		}
+		return nil
+	}
+
+	// ------------------------------------------------------------
 	// Cache des images de programmes
 	// ------------------------------------------------------------
 
@@ -134,7 +166,7 @@ func main() {
 	log.Println("GÉNÉRATION XMLTV AU DÉMARRAGE")
 	log.Println("========================================")
 
-	if err := generateEPG(); err != nil {
+	if err := refreshGuide(); err != nil {
 		// Le serveur web doit rester accessible au premier démarrage,
 		// notamment pour permettre l'importation et la sélection des
 		// chaînes depuis /channels. Le guide sera généré après activation
@@ -227,7 +259,7 @@ func main() {
 		cfg.SchedulerEnabled,
 		cfg.SchedulerTime,
 		cfg.SchedulerTimezone,
-		generateEPG,
+		refreshGuide,
 	)
 	if err != nil {
 		log.Fatalf(
