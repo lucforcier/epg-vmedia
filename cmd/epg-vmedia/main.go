@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"epg-vmedia/internal/config"
@@ -81,6 +82,10 @@ func main() {
 
 	if err := database.Initialize(db); err != nil {
 		log.Fatalf("Erreur initialisation SQLite : %v", err)
+	}
+
+	if err := database.InitializeEPGSchema(db); err != nil {
+		log.Fatalf("Erreur initialisation du schéma EPG SQLite : %v", err)
 	}
 
 	// ------------------------------------------------------------
@@ -155,7 +160,13 @@ func main() {
 	// Rafraîchissement du catalogue des chaînes et logos
 	// ------------------------------------------------------------
 
+	var refreshChannelsMu sync.Mutex
+
 	refreshChannels := func() error {
+		// Le scheduler et l'endpoint HTTP partagent le même importateur.
+		// Sérialiser les appels évite deux écritures concurrentes dans SQLite.
+		refreshChannelsMu.Lock()
+		defer refreshChannelsMu.Unlock()
 
 		log.Println(
 			"Rafraîchissement du catalogue des chaînes et des logos",
@@ -403,26 +414,8 @@ func main() {
 		log.Println("RAFRAÎCHISSEMENT DES CHAÎNES DEMANDÉ PAR LE WEB")
 		log.Println("========================================")
 
-		cmd := exec.Command(
-			"/opt/epg-vmedia/import-channels",
-			"--refresh-logos",
-		)
-
-		output, err := cmd.CombinedOutput()
-
-		if len(output) > 0 {
-			log.Printf(
-				"Sortie importateur :\n%s",
-				string(output),
-			)
-		}
-
-		if err != nil {
-			log.Printf(
-				"Erreur rafraîchissement des chaînes : %v",
-				err,
-			)
-
+		if err := refreshChannels(); err != nil {
+			log.Printf("Erreur rafraîchissement des chaînes : %v", err)
 			http.Error(
 				w,
 				"Erreur lors du rafraîchissement des chaînes",
