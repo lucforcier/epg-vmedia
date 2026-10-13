@@ -10,6 +10,7 @@ RUN go mod download
 COPY . .
 RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/epg-vmedia ./cmd/epg-vmedia \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/import-channels ./cmd/import-channels \
+ && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/import-guide ./cmd/import-guide \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/generate-epg ./cmd/generate-epg
 
 FROM alpine:3.22
@@ -22,6 +23,7 @@ RUN apk add --no-cache ca-certificates tzdata \
 WORKDIR /opt/epg-vmedia
 COPY --from=build --chown=epg:epg /out/epg-vmedia /opt/epg-vmedia/epg-vmedia
 COPY --from=build --chown=epg:epg /out/import-channels /opt/epg-vmedia/import-channels
+COPY --from=build --chown=epg:epg /out/import-guide /opt/epg-vmedia/import-guide
 COPY --from=build --chown=epg:epg /out/generate-epg /opt/epg-vmedia/generate-epg
 COPY --chown=epg:epg templates/ /opt/epg-vmedia/templates/
 
