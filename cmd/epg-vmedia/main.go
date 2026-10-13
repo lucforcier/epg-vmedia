@@ -137,7 +137,7 @@ func main() {
 
 		output, err := cmd.CombinedOutput()
 		if len(output) > 0 {
-			log.Printf("Sortie import-guide :\\n%s", string(output))
+			log.Printf("Sortie import-guide :\n%s", string(output))
 		}
 		if err != nil {
 			return fmt.Errorf("import-guide (14 jours) : %w", err)
