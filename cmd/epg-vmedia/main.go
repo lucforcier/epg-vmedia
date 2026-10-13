@@ -629,6 +629,12 @@ func main() {
 				processedCount,
 			)
 
+			// Publier immédiatement le guide correspondant à la sélection
+			// sauvegardée, plutôt que d'attendre la prochaine exécution planifiée.
+			if err := generateEPG(); err != nil {
+				log.Printf("Impossible de régénérer le guide après la sauvegarde des chaînes : %v", err)
+			} 
+
 			http.Redirect(
 				w,
 				r,
