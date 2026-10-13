@@ -1,0 +1,15 @@
+.git
+.github
+.idea
+.env
+*.db
+*.db-shm
+*.db-wal
+*.xml
+*.json
+*.log
+epg-vmedia
+generate-epg
+import-channels
+_archive-analysis
+_archive-database
