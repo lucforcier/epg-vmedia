@@ -17,7 +17,7 @@ services:
       EPG_PORT: "5580"
       EPG_DATA_DIR: /data
       EPG_XML_PATH: /data/epg.xml
-      EPG_BASE_URL: ${EPG_BASE_URL:-http://localhost:18088}
+      EPG_BASE_URL: ${EPG_BASE_URL:?Définir EPG_BASE_URL avec une URL accessible depuis les clients IPTV}
       EPG_SCHEDULER_ENABLED: ${EPG_SCHEDULER_ENABLED:-true}
       EPG_SCHEDULER_TIME: ${EPG_SCHEDULER_TIME:-03:00}
       EPG_SCHEDULER_TIMEZONE: ${TZ:-America/Toronto}
